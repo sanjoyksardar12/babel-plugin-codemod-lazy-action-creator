@@ -1,20 +1,24 @@
+const path = require("path");
+const fs = require("fs");
+const babelParser = require("@babel/parser");
+const traverse = require("@babel/traverse").default;
+
 "use strict";
 
 exports.__esModule = true;
 
 exports.default = function ({ types: t }) {
   return {
-    name: "babel-plugin-codemod-lazy-action-creator",
+    name: "fsafgdsadf",
+    pre(state){
+      this.cache = new Map();
+    },
     visitor: {
       CallExpression(path) {
-
         if (path.node.callee.name !== "connect") {
           return;
         }
-        if (isDisableFile(path.findParent(p=>p.isProgram()))) {
-          return;
-        }
-        if(path.hub.file.opts.filename.includes("node_module")){
+        if (isDisableFile(path)) {
           return;
         }
         const mapDispatchToPropsNode = getMapDispatchToPropsNode(path);
@@ -27,7 +31,8 @@ exports.default = function ({ types: t }) {
           returnStatement,
           aMDTPDecl,
           isConnectItselfContainingDeclaration
-        } = getReturnStatement(path, mapDispatchToPropsNode)||{};  //ObjectExpression|ArrowFunctionExpression|FunctionExpression
+        } = getReturnStatement(path, mapDispatchToPropsNode);  //ObjectExpression|ArrowFunctionExpression|FunctionExpression
+
         if(!returnStatement){
           return;
         }
@@ -40,17 +45,18 @@ exports.default = function ({ types: t }) {
         modifyReturnStatetmentWithDynamicImport(returnStatement, t, isMapDispatchToPropsObject, path);
         updateNodePath(isMapDispatchToPropsObject, isConnectItselfContainingDeclaration, t, aMDTPDecl, path);
       }
+    },
+    post(state){
     }
   };
 };
-
 
 const SPECIFIER_TYPES = {
   ImportDefaultSpecifier: "ImportDefaultSpecifier",
   ImportNamespaceSpecifier: "ImportNamespaceSpecifier",
   ImportSpecifier: "ImportSpecifier"
 };
-const COMMENT_TYPE_REGEX = /\s*babel\s+lazy\-codemod\-action\-creator\:\s+\"disable\"\s*/;
+const COMMENT_TYPE_REGEX = /\s*babel\s+lazy\-action\-creator\:\s+\"disable\"\s*/;
 
 function updateNodePath(isMapDispatchToPropsObject, isConnectItselfContainingDeclaration, t, aMDTPDecl, path) {
   if (isMapDispatchToPropsObject && !isConnectItselfContainingDeclaration) {
@@ -105,7 +111,7 @@ function calculateOriginalActionNameAndSpecifier(returnArgument) { // ArrowFunct
     case "ArrowFunctionExpression": {
       returnArgument.traverse({
         CallExpression(dispatchNode) {
-          //considering only one dispatch method will be in the callback
+          //considering only one dispatch method will be in callback
           if (dispatchNode.node.callee.name !== "dispatch") {
             return;
           }
@@ -114,8 +120,13 @@ function calculateOriginalActionNameAndSpecifier(returnArgument) { // ArrowFunct
           if (callee.type === "Identifier") {
             originalActionName = callee.name;
           } else if (callee.type === "MemberExpression") {
-            originalActionName = callee.object.name;
-            originalActionSpecifier = callee.property.name;
+            // if(callee.object.type=== "MemberExpression"){
+            //   originalActionName = callee.object.object.name;
+            //   originalActionSpecifier = callee.object.property.name;
+            // }else {
+              originalActionName = callee.object.name;
+              originalActionSpecifier = callee.property.name;
+            // }
           }
         }
       });
@@ -138,25 +149,40 @@ function getOriginalParams(t, prop, isMapDispatchToPropsObject) {
 
 
 function modifyReturnStatetmentWithDynamicImport(returnStatement, t, isMapDispatchToPropsObject, path) {
-  const properties = getReturnStatementProperties(returnStatement, isMapDispatchToPropsObject); // [ObjectProperty(key, value)]
+  let properties = getReturnStatementProperties(returnStatement, isMapDispatchToPropsObject); // [ObjectProperty(key, value)]
+  for (let i = 0; i < properties.length; i++) {
+    const prop = properties[i];
+
+    if(prop.node.type === "SpreadElement" && prop.node.argument.type === "Identifier"){
+      modifyImport(prop, t);
+      prop.remove();
+    }
+
+  }
+  properties = getReturnStatementProperties(returnStatement, isMapDispatchToPropsObject); // [ObjectProperty(key, value)]
   for (let i = 0; i < properties.length; i++) {
     let prop = properties[i]; //ObjectProperty(key, value)
     if (isPluginDisableForProperty(prop)) {
       continue;
     }
+
     const returnArgument = prop.get("value"); //ArrowFunctionExpression|FunctionExpression|Identifier|MemberExpression
+
+    const actionNameAsProp = prop.node.key.name;
     let {
       originalActionName,
       originalActionSpecifier
     } = calculateOriginalActionNameAndSpecifier(returnArgument);
 
-    const actionNameAsProp = prop.node.key.name;
+
     const {
       importStatement,
       specifierType,
       specifier,
       namedImport
     } = getImportStatement(returnStatement, originalActionName);
+
+
 
     const originalParams = getOriginalParams(t, prop, isMapDispatchToPropsObject);
 
@@ -176,7 +202,7 @@ function modifyReturnStatetmentWithDynamicImport(returnStatement, t, isMapDispat
 
     cleanUpImportStatement(importStatement, originalActionName);
     //let prog = path.findParent((p) => p.isProgram());
-    //console.log("program===", prog);
+    //prog.node.body.push(modifiedFunction);
     if (isMapDispatchToPropsObject) {
       prop.node.value = modifiedFunction
 
@@ -192,10 +218,67 @@ function modifyReturnStatetmentWithDynamicImport(returnStatement, t, isMapDispat
   }
 }
 
+function modifyImport(path, t) {
+  let spreadElementName = path.node.argument.name;
+  const {
+    importStatement,
+    specifierType,
+    specifier,
+    namedImport
+  } = getImportStatement(path, spreadElementName);
+  replaceSpecifier(importStatement, specifier, path, t);
+}
+
+function replaceSpecifier(importStatement, specifier, spreadElement, t){
+  const exportedNamedDeclarations = getExportedFunctionsName(importStatement, spreadElement);
+  exportedNamedDeclarations.forEach(identifier=>{
+    const property = t.objectProperty(t.identifier(identifier), t.identifier(identifier));
+    spreadElement.parentPath.node.properties.push(property);
+    updateImportDeclaration(importStatement,identifier , t);
+  });
+  cleanUpImportStatement(importStatement, spreadElement.node.argument.name);
+}
+function updateImportDeclaration(importStatement, identifier, t) {
+  importStatement.node.specifiers.push(t.importSpecifier(t.identifier(identifier), t.identifier(identifier)));
+}
+function getExportedFunctionsName(importStatement, spreadElement) {
+  const importFileAbsolutePath = getImportFileAbsolutePath(importStatement, spreadElement);
+  const importFileContent = getImportedFileContent(importFileAbsolutePath);
+  const importFileContentAsAst =babelParser.parse(importFileContent, { sourceType: "module"});
+  let exportedNamedDeclarations=[];
+
+  traverse(importFileContentAsAst, {
+    ExportNamedDeclaration: function ({node}) {
+      let exportedFuncName;
+      if(node.declaration.type ==="FunctionDeclaration"){
+        exportedFuncName = node.declaration.id.name;
+      }else if(node.declaration.type ==="VariableDeclaration"){
+        exportedFuncName = node.declaration.declarations[0].id.name;
+      }
+      exportedNamedDeclarations.push(exportedFuncName);
+    }
+  });
+  return exportedNamedDeclarations;
+}
+
+function getImportFileAbsolutePath(importStatement, spreadElement){
+  const currentFilePath = spreadElement.hub.file.opts.filename;
+  const importFileRelativePath = importStatement.node.source.value;
+  const currentDir  = path.dirname(currentFilePath);
+  const importFileAbsolutePath = path.join(currentDir, importFileRelativePath);
+
+  return importFileAbsolutePath;
+}
+
 function isPluginDisableForProperty(path) {
   return (path.node.leadingComments || []).filter(({ type, value }) =>
     type === "CommentBlock" && COMMENT_TYPE_REGEX.test(value)).length;
 }
+
+function getImportedFileContent(importFileAbsolutePath) {
+  return fs.readFileSync(importFileAbsolutePath, "utf-8");
+}
+
 
 function constructLazyActionCreator(
   t,
@@ -368,7 +451,7 @@ function getReturnStatement(path, mapDispatchToPropsNode) {
 
 
     let returnStatement;
-    let declarator = aMDTPDecl.get("init").node? aMDTPDecl.get("init"): aMDTPDecl.get("body");
+    let declarator = aMDTPDecl.get("init");
     if (declarator.node.type === "ObjectExpression") {
       return {
         returnStatement: declarator,
@@ -376,6 +459,8 @@ function getReturnStatement(path, mapDispatchToPropsNode) {
         aMDTPDecl: aMDTPDecl
       };
     }else { //add conditions
+      // if(declarator.node.type === "ArrowFunctionExpression" || declarator.node.type === "FunctionExpression")
+      // const body =
       let outerReturn = false;
       declarator.traverse({
         ReturnStatement(path) {
@@ -387,12 +472,16 @@ function getReturnStatement(path, mapDispatchToPropsNode) {
         }
       });
       outerReturn = false;
+      // if(returnStatement === undefined){
+      //   returnStatement = declarator.node.body;
+      // }
       return {
         returnStatement: returnStatement,
         isConnectItselfContainingDeclaration: false,
         aMDTPDecl: aMDTPDecl
       };
     }
+
   }
 }
 
@@ -402,31 +491,24 @@ function getACtualMapDispToPropsDeclaration({ program, mapDispatchToPropsName })
   let actualMapDispToPropsDeclaration;
   const body = program.node.body;
   const rootLevelVariableDeclaration = program.get("body").filter((child) => {
-    if (child.node.type === "VariableDeclaration" || child.node.type === "FunctionDeclaration") {
+    if (child.node.type === "VariableDeclaration") {
       return true;
     }
   });
   for (let i = 0; i < rootLevelVariableDeclaration.length; i++) {
     const variableDeclaration = rootLevelVariableDeclaration[i];
+    const declarations = variableDeclaration.get("declarations");
 
-    if (variableDeclaration.node.type === "VariableDeclaration") {
-      const declarations = variableDeclaration.get("declarations");
-      for (let j = 0; j < declarations.length; j++) {
-        const declaration = declarations[j];
-        if (declaration.node.id.name === mapDispatchToPropsName) {
-          //add regex
-          //actualMapDispToPropsDeclaration = declaration;
-          return declaration;
-          break;
-        }
-      }
-    } else if (variableDeclaration.node.type === "FunctionDeclaration") {
-      if(variableDeclaration.node.id.name===mapDispatchToPropsName){
-        return variableDeclaration;
+    for (let j = 0; j < declarations.length; j++) {
+      const declaration = declarations[j];
+      if (declaration.node.id.name === mapDispatchToPropsName) {
+        //add regex
+        actualMapDispToPropsDeclaration = declaration;
+        break;
       }
     }
   }
-  // return actualMapDispToPropsDeclaration;
+  return actualMapDispToPropsDeclaration;
 }
 
 
@@ -444,5 +526,6 @@ function getMapDispatchToPropsNode(path) {
   }
   return undefined;
 }
+
 
 
