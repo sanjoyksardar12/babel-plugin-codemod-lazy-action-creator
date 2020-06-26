@@ -4,7 +4,7 @@ exports.__esModule = true;
 
 exports.default = function ({ types: t }) {
   return {
-    name: "babel-plugin-lazy-action-creator",
+    name: "babel-plugin-codemod-lazy-action-creator",
     visitor: {
       CallExpression(path) {
 
@@ -50,7 +50,7 @@ const SPECIFIER_TYPES = {
   ImportNamespaceSpecifier: "ImportNamespaceSpecifier",
   ImportSpecifier: "ImportSpecifier"
 };
-const COMMENT_TYPE_REGEX = /\s*babel\s+lazy\-action\-creator\:\s+\"disable\"\s*/;
+const COMMENT_TYPE_REGEX = /\s*babel\s+lazy\-codemod\-action\-creator\:\s+\"disable\"\s*/;
 
 function updateNodePath(isMapDispatchToPropsObject, isConnectItselfContainingDeclaration, t, aMDTPDecl, path) {
   if (isMapDispatchToPropsObject && !isConnectItselfContainingDeclaration) {

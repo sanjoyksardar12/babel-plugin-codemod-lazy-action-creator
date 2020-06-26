@@ -53,7 +53,7 @@ Now if we bundle this, then we will get four chunks,
 
 # usage
 ```
-  npm i babel-plugin-codemod-lazy-action-creator
+  npm i babel-plugin-codemod-lazy-action-creator --save-dev
 ```
 and add .babelrc
 ```
