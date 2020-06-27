@@ -9,7 +9,7 @@ exports.__esModule = true;
 
 exports.default = function ({ types: t }) {
   return {
-    name: "fsafgdsadf",
+    name: "babel-plugin-codemod-lazy-action-creator",
     pre(state){
       this.cache = new Map();
     },
@@ -56,7 +56,7 @@ const SPECIFIER_TYPES = {
   ImportNamespaceSpecifier: "ImportNamespaceSpecifier",
   ImportSpecifier: "ImportSpecifier"
 };
-const COMMENT_TYPE_REGEX = /\s*babel\s+lazy\-action\-creator\:\s+\"disable\"\s*/;
+const COMMENT_TYPE_REGEX = /\s*babel\s+lazy\-codemod\-action\-creator\:\s+\"disable\"\s*/;
 
 function updateNodePath(isMapDispatchToPropsObject, isConnectItselfContainingDeclaration, t, aMDTPDecl, path) {
   if (isMapDispatchToPropsObject && !isConnectItselfContainingDeclaration) {
@@ -111,7 +111,7 @@ function calculateOriginalActionNameAndSpecifier(returnArgument) { // ArrowFunct
     case "ArrowFunctionExpression": {
       returnArgument.traverse({
         CallExpression(dispatchNode) {
-          //considering only one dispatch method will be in callback
+          //considering only one dispatch method will be in the callback
           if (dispatchNode.node.callee.name !== "dispatch") {
             return;
           }
@@ -451,7 +451,7 @@ function getReturnStatement(path, mapDispatchToPropsNode) {
 
 
     let returnStatement;
-    let declarator = aMDTPDecl.get("init").node? aMDTPDecl.get("init"): aMDTPDecl.get("body");;
+    let declarator = aMDTPDecl.get("init").node? aMDTPDecl.get("init"): aMDTPDecl.get("body");
     if (declarator.node.type === "ObjectExpression") {
       return {
         returnStatement: declarator,
