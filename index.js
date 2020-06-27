@@ -15,18 +15,17 @@ exports.default = function ({ types: t }) {
     },
     visitor: {
       CallExpression(path) {
-        if (path.node.callee.name !== "connect") {
-          return;
-        }
-        if (isDisableFile(path)) {
+
+        if(!isRequiredlazyLoad(path)){
           return;
         }
         const mapDispatchToPropsNode = getMapDispatchToPropsNode(path);
-        if(!mapDispatchToPropsNode){
+        if(isValidMapDispatchToProps(mapDispatchToPropsNode)){
           return;
         }
 
         let isMapDispatchToPropsObject = false;
+
         let {
           returnStatement,
           aMDTPDecl,
@@ -51,12 +50,18 @@ exports.default = function ({ types: t }) {
   };
 };
 
+const COMMENT_TYPE_REGEX = /\s*babel\s+lazy\-codemod\-action\-creator\:\s+\"disable\"\s*/;
+
+
+
+
+
 const SPECIFIER_TYPES = {
   ImportDefaultSpecifier: "ImportDefaultSpecifier",
   ImportNamespaceSpecifier: "ImportNamespaceSpecifier",
   ImportSpecifier: "ImportSpecifier"
 };
-const COMMENT_TYPE_REGEX = /\s*babel\s+lazy\-codemod\-action\-creator\:\s+\"disable\"\s*/;
+
 
 function updateNodePath(isMapDispatchToPropsObject, isConnectItselfContainingDeclaration, t, aMDTPDecl, path) {
   if (isMapDispatchToPropsObject && !isConnectItselfContainingDeclaration) {
@@ -75,18 +80,7 @@ function updateNodePath(isMapDispatchToPropsObject, isConnectItselfContainingDec
   }
 }
 
-function isDisableFile(program) {
-  for (let i = 0; program.node.body && i < program.node.body.length; i++) {
-    const bodyElement = program.node.body[i];
-    for (let j = 0; bodyElement.leadingComments && j < bodyElement.leadingComments.length; j++) {
-      let comment = bodyElement.leadingComments[j];
-      const { type, value } = comment;
-      if (type === "CommentBlock" && COMMENT_TYPE_REGEX.test(value.trim())) {
-        return true;
-      }
-    }
-  };
-}
+
 
 function getReturnStatementProperties(returnStatement, isMapDispatchToPropsObject) {
   if (!isMapDispatchToPropsObject) {
@@ -436,89 +430,53 @@ function isSpecifierContainRequiredSpecifier(specifier, requiredSpecifierName) {
     namedImport: imported ? imported.name : null
   };
 }
-//refactor this code using switch
-function getReturnStatement(path, mapDispatchToPropsNode) {
-  if(mapDispatchToPropsNode.node.type === "ObjectExpression"){
-    return {
-      returnStatement: mapDispatchToPropsNode,
-      isConnectItselfContainingDeclaration: true,
-      aMDTPDecl: undefined
-    };
-  }else if(mapDispatchToPropsNode.node.type === "Identifier"){
-    const mapDispatchToPropsName = mapDispatchToPropsNode.node.name;
-    const program = getParentProgram(path);
-    let aMDTPDecl = getACtualMapDispToPropsDeclaration({ program, mapDispatchToPropsName });
 
 
-    let returnStatement;
-    let declarator = aMDTPDecl.get("init").node? aMDTPDecl.get("init"): aMDTPDecl.get("body");
-    if (declarator.node.type === "ObjectExpression") {
-      return {
-        returnStatement: declarator,
-        isConnectItselfContainingDeclaration: false,
-        aMDTPDecl: aMDTPDecl
-      };
-    }else { //add conditions
-      // if(declarator.node.type === "ArrowFunctionExpression" || declarator.node.type === "FunctionExpression")
-      // const body =
-      let outerReturn = false;
-      declarator.traverse({
-        ReturnStatement(path) {
-          if (outerReturn) {
-            return;
-          }
-          returnStatement = path;
-          outerReturn = true;
-        }
-      });
-      outerReturn = false;
-      // if(returnStatement === undefined){
-      //   returnStatement = declarator.node.body;
-      // }
-      return {
-        returnStatement: returnStatement,
-        isConnectItselfContainingDeclaration: false,
-        aMDTPDecl: aMDTPDecl
-      };
-    }
 
+
+
+
+
+
+
+
+
+
+
+//start
+function isRequiredlazyLoad(path) {
+  if (path.node.callee.name !== "connect") {
+    return false;
   }
-}
-
-
-
-function getACtualMapDispToPropsDeclaration({ program, mapDispatchToPropsName }) {
-  let actualMapDispToPropsDeclaration;
-  const body = program.node.body;
-  const rootLevelVariableDeclaration = program.get("body").filter((child) => {
-    if (child.node.type === "VariableDeclaration") {
-      return true;
-    }
-  });
-  for (let i = 0; i < rootLevelVariableDeclaration.length; i++) {
-    const variableDeclaration = rootLevelVariableDeclaration[i];
-    const declarations = variableDeclaration.get("declarations");
-
-    for (let j = 0; j < declarations.length; j++) {
-      const declaration = declarations[j];
-      if (declaration.node.id.name === mapDispatchToPropsName) {
-        //add regex
-        actualMapDispToPropsDeclaration = declaration;
-        break;
-      }
-    }
+  if (isDisableFile(getParentProgram(path))) {
+    return false;
   }
-  return actualMapDispToPropsDeclaration;
+  return true;
 }
-
 
 function getParentProgram(path) {
   return path.findParent(p => p.isProgram());
 }
 
+function isDisableFile(program) {
+  for (let i = 0; program.node.body && i < program.node.body.length; i++) {
+    const bodyElement = program.node.body[i];
+    for (let j = 0; bodyElement.leadingComments && j < bodyElement.leadingComments.length; j++) {
+      let comment = bodyElement.leadingComments[j];
+      const { type, value } = comment;
+      if (type === "CommentBlock" && COMMENT_TYPE_REGEX.test(value.trim())) {
+        return true;
+      }
+    }
+  };
+}
+
+
+
+
 
 //path=> connect statement
-//return=>return second params name in connect statement as node
+//return= second params name in connect statement as node
 function getMapDispatchToPropsNode(path) {
   const args = path.get("arguments");
   if (args.length > 1) {
@@ -527,5 +485,96 @@ function getMapDispatchToPropsNode(path) {
   return undefined;
 }
 
+//mapDispatchToPropsNode=> connect expression's 2nd parameter as node
+function isValidMapDispatchToProps(mapDispatchToPropsNode) {
+  return !mapDispatchToPropsNode || mapDispatchToPropsNode.isNullLiteral() || (mapDispatchToPropsNode.node.name === "undefined");
+}
 
 
+
+//refactor this code using switch
+//path=> connect statement
+//mapDispatchToPropsNode => connect expression's 2nd parameter as node
+function getReturnStatement(path, mapDispatchToPropsNode) {
+  switch(mapDispatchToPropsNode.node.type){
+    case "ObjectExpression":{
+      return{
+        returnStatement: mapDispatchToPropsNode,
+        isConnectItselfContainingDeclaration: true,
+        aMDTPDecl: undefined
+      }
+    }
+    case "Identifier":{
+      const mapDispatchToPropsName = mapDispatchToPropsNode.node.name;
+      const program = getParentProgram(path);
+      let aMDTPDecl = getActualMapDispToPropsDeclaration(program, mapDispatchToPropsName);
+
+      if(aMDTPDecl.node.type === "VariableDeclarator"){
+        const declaratorValue =aMDTPDecl.get("init");
+        if(declaratorValue.node.type === "ObjectExpression"){
+          return {
+            returnStatement: declaratorValue,
+            isConnectItselfContainingDeclaration: false,
+            aMDTPDecl: aMDTPDecl
+          };
+        }else if((declaratorValue.node.type === "ArrowFunctionDeclaration")
+          || (declaratorValue.node.type === "FunctionDeclaration")){
+          const funcBody = declaratorValue.get("body");
+          const returnStatement = getFunctionsReturnStatement(funcBody);
+          return {
+            returnStatement: returnStatement,
+            isConnectItselfContainingDeclaration: false,
+            aMDTPDecl: aMDTPDecl
+          };
+        }
+
+      }else if( aMDTPDecl.node.type === "FunctionDeclaration"){
+        const funcBody = aMDTPDecl.get("body");
+        const returnStatement = getFunctionsReturnStatement(funcBody);
+        return {
+          returnStatement: returnStatement,
+          isConnectItselfContainingDeclaration: false,
+          aMDTPDecl: aMDTPDecl
+        };
+      }
+    }
+  }
+}
+
+function getActualMapDispToPropsDeclaration(program, mapDispatchToPropsName) {
+  const declarations = getRootLevelVariablesAndFunctions(program);
+  for (let i = 0; i < declarations.length; i++) {
+    const declaration = declarations[i];
+    debugger
+    if (declaration.node.type === "VariableDeclaration") {
+      const declarators = declaration.get("declarations");
+      for (let j = 0; j < declarators.length; j++) {
+        const declarator = declarators[j];
+        if (declarator.node.id.name === mapDispatchToPropsName) {
+          return declarator;
+        }
+      }
+    } else if (declaration.node.type === "FunctionDeclaration") {
+      if (declaration.node.id.name === mapDispatchToPropsName) {
+        return declaration;
+      }
+    }
+  }
+}
+
+function getRootLevelVariablesAndFunctions(program) {
+  const progBody = program.get("body");
+  return progBody.filter(({node:{type}}) =>(type === "VariableDeclaration" || type === "FunctionDeclaration"));
+}
+
+function getFunctionsReturnStatement(funcBody) {
+  switch (funcBody.node.type) {
+    case "ObjectExpression": {
+      return funcBody;
+    }
+    case "BlockStatement": {
+      const blockStatements = funcBody.get("body");
+      return blockStatements.filter(({ node: { type } }) => type === "ReturnStatement")[0].get("argument");
+    }
+  }
+}
