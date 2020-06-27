@@ -451,7 +451,7 @@ function getReturnStatement(path, mapDispatchToPropsNode) {
 
 
     let returnStatement;
-    let declarator = aMDTPDecl.get("init");
+    let declarator = aMDTPDecl.get("init").node? aMDTPDecl.get("init"): aMDTPDecl.get("body");;
     if (declarator.node.type === "ObjectExpression") {
       return {
         returnStatement: declarator,
