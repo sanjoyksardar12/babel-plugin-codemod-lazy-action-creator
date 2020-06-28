@@ -10,17 +10,17 @@ exports.__esModule = true;
 exports.default = function ({ types: t }) {
   return {
     name: "babel-plugin-codemod-lazy-action-creator",
-    pre(state){
+    pre(state) {
       this.cache = new Map();
     },
     visitor: {
       CallExpression(path) {
 
-        if(!isRequiredlazyLoad(path)){
+        if (!isRequiredlazyLoad(path)) {
           return;
         }
         const mapDispatchToPropsNode = getMapDispatchToPropsNode(path);
-        if(isValidMapDispatchToProps(mapDispatchToPropsNode)){
+        if (isValidMapDispatchToProps(mapDispatchToPropsNode)) {
           return;
         }
 
@@ -32,12 +32,15 @@ exports.default = function ({ types: t }) {
           isConnectItselfContainingDeclaration
         } = getReturnStatement(path, mapDispatchToPropsNode);  //ObjectExpression|ArrowFunctionExpression|FunctionExpression
 
-        if(!returnStatement){
+        if (!returnStatement) {
           return;
         }
         if (returnStatement.node.type === "ObjectExpression") {
           isMapDispatchToPropsObject = true;
         }
+        // if(isConnectItselfContainingDeclaration){
+        //   isMapDispatchToPropsObject = true;
+        // }
         if (!isMapDispatchToPropsObject && returnStatement.node.argument.type !== "ObjectExpression") {
           return;
         }
@@ -45,7 +48,7 @@ exports.default = function ({ types: t }) {
         updateNodePath(isMapDispatchToPropsObject, isConnectItselfContainingDeclaration, t, aMDTPDecl, path);
       }
     },
-    post(state){
+    post(state) {
     }
   };
 };
@@ -118,8 +121,8 @@ function calculateOriginalActionNameAndSpecifier(returnArgument) { // ArrowFunct
             //   originalActionName = callee.object.object.name;
             //   originalActionSpecifier = callee.object.property.name;
             // }else {
-              originalActionName = callee.object.name;
-              originalActionSpecifier = callee.property.name;
+            originalActionName = callee.object.name;
+            originalActionSpecifier = callee.property.name;
             // }
           }
         }
@@ -147,7 +150,7 @@ function modifyReturnStatetmentWithDynamicImport(returnStatement, t, isMapDispat
   for (let i = 0; i < properties.length; i++) {
     const prop = properties[i];
 
-    if(prop.node.type === "SpreadElement" && prop.node.argument.type === "Identifier"){
+    if (prop.node.type === "SpreadElement" && prop.node.argument.type === "Identifier") {
       modifyImport(prop, t);
       prop.remove();
     }
@@ -223,12 +226,12 @@ function modifyImport(path, t) {
   replaceSpecifier(importStatement, specifier, path, t);
 }
 
-function replaceSpecifier(importStatement, specifier, spreadElement, t){
+function replaceSpecifier(importStatement, specifier, spreadElement, t) {
   const exportedNamedDeclarations = getExportedFunctionsName(importStatement, spreadElement);
-  exportedNamedDeclarations.forEach(identifier=>{
+  exportedNamedDeclarations.forEach(identifier => {
     const property = t.objectProperty(t.identifier(identifier), t.identifier(identifier));
     spreadElement.parentPath.node.properties.push(property);
-    updateImportDeclaration(importStatement,identifier , t);
+    updateImportDeclaration(importStatement, identifier, t);
   });
   cleanUpImportStatement(importStatement, spreadElement.node.argument.name);
 }
@@ -238,15 +241,15 @@ function updateImportDeclaration(importStatement, identifier, t) {
 function getExportedFunctionsName(importStatement, spreadElement) {
   const importFileAbsolutePath = getImportFileAbsolutePath(importStatement, spreadElement);
   const importFileContent = getImportedFileContent(importFileAbsolutePath);
-  const importFileContentAsAst =babelParser.parse(importFileContent, { sourceType: "module"});
-  let exportedNamedDeclarations=[];
+  const importFileContentAsAst = babelParser.parse(importFileContent, { sourceType: "module" });
+  let exportedNamedDeclarations = [];
 
   traverse(importFileContentAsAst, {
-    ExportNamedDeclaration: function ({node}) {
+    ExportNamedDeclaration: function ({ node }) {
       let exportedFuncName;
-      if(node.declaration.type ==="FunctionDeclaration"){
+      if (node.declaration.type === "FunctionDeclaration") {
         exportedFuncName = node.declaration.id.name;
-      }else if(node.declaration.type ==="VariableDeclaration"){
+      } else if (node.declaration.type === "VariableDeclaration") {
         exportedFuncName = node.declaration.declarations[0].id.name;
       }
       exportedNamedDeclarations.push(exportedFuncName);
@@ -255,10 +258,10 @@ function getExportedFunctionsName(importStatement, spreadElement) {
   return exportedNamedDeclarations;
 }
 
-function getImportFileAbsolutePath(importStatement, spreadElement){
+function getImportFileAbsolutePath(importStatement, spreadElement) {
   const currentFilePath = spreadElement.hub.file.opts.filename;
   const importFileRelativePath = importStatement.node.source.value;
-  const currentDir  = path.dirname(currentFilePath);
+  const currentDir = path.dirname(currentFilePath);
   const importFileAbsolutePath = path.join(currentDir, importFileRelativePath);
 
   return importFileAbsolutePath;
@@ -432,17 +435,6 @@ function isSpecifierContainRequiredSpecifier(specifier, requiredSpecifierName) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 //start
 function isRequiredlazyLoad(path) {
   if (path.node.callee.name !== "connect") {
@@ -472,9 +464,6 @@ function isDisableFile(program) {
 }
 
 
-
-
-
 //path=> connect statement
 //return= second params name in connect statement as node
 function getMapDispatchToPropsNode(path) {
@@ -496,56 +485,65 @@ function isValidMapDispatchToProps(mapDispatchToPropsNode) {
 //path=> connect statement
 //mapDispatchToPropsNode => connect expression's 2nd parameter as node
 function getReturnStatement(path, mapDispatchToPropsNode) {
-  switch(mapDispatchToPropsNode.node.type){
-    case "ObjectExpression":{
-      return{
+  switch (mapDispatchToPropsNode.node.type) {
+    case "ObjectExpression": {
+      return {
         returnStatement: mapDispatchToPropsNode,
         isConnectItselfContainingDeclaration: true,
         aMDTPDecl: undefined
       }
     }
-    case "Identifier":{
+    case "Identifier": {
       const mapDispatchToPropsName = mapDispatchToPropsNode.node.name;
       const program = getParentProgram(path);
       let aMDTPDecl = getActualMapDispToPropsDeclaration(program, mapDispatchToPropsName);
 
-      if(aMDTPDecl.node.type === "VariableDeclarator"){
-        const declaratorValue =aMDTPDecl.get("init");
-        if(declaratorValue.node.type === "ObjectExpression"){
+      if (aMDTPDecl.node.type === "VariableDeclarator") {
+        const declaratorValue = aMDTPDecl.get("init");
+        const { node: { type: declaratorValueType } } = declaratorValue;
+        if (declaratorValueType === "ObjectExpression") {
           return {
             returnStatement: declaratorValue,
             isConnectItselfContainingDeclaration: false,
             aMDTPDecl: aMDTPDecl
           };
-        }else if((declaratorValue.node.type === "ArrowFunctionDeclaration")
-          || (declaratorValue.node.type === "FunctionDeclaration")){
-          const funcBody = declaratorValue.get("body");
-          const returnStatement = getFunctionsReturnStatement(funcBody);
-          return {
-            returnStatement: returnStatement,
-            isConnectItselfContainingDeclaration: false,
-            aMDTPDecl: aMDTPDecl
-          };
+        } else if (["ArrowFunctionExpression", "FunctionDeclaration"].includes(declaratorValueType)) {
+          return getReturnStatementFromFunctionDeclaration(declaratorValue);
         }
-
-      }else if( aMDTPDecl.node.type === "FunctionDeclaration"){
-        const funcBody = aMDTPDecl.get("body");
-        const returnStatement = getFunctionsReturnStatement(funcBody);
-        return {
-          returnStatement: returnStatement,
-          isConnectItselfContainingDeclaration: false,
-          aMDTPDecl: aMDTPDecl
-        };
+      } else if (aMDTPDecl.node.type === "FunctionDeclaration") {
+        return getReturnStatementFromFunctionDeclaration(aMDTPDecl);
       }
     }
   }
 }
 
+function getReturnStatementFromFunctionDeclaration(funcDeclaration) {
+  const funcBody = funcDeclaration.get("body");
+  const returnStatement = getFunctionsReturnStatement(funcBody);
+  return {
+    returnStatement: returnStatement,
+    isConnectItselfContainingDeclaration: false,
+    aMDTPDecl: funcDeclaration
+  };
+}
+
+function getFunctionsReturnStatement(funcBody) {
+  switch (funcBody.node.type) {
+    case "ObjectExpression": {
+      return funcBody;
+    }
+    case "BlockStatement": {
+      const blockStatements = funcBody.get("body");
+      return blockStatements.filter(({ node: { type } }) => type === "ReturnStatement")[0];
+    }
+  }
+}
+
+
 function getActualMapDispToPropsDeclaration(program, mapDispatchToPropsName) {
   const declarations = getRootLevelVariablesAndFunctions(program);
   for (let i = 0; i < declarations.length; i++) {
     const declaration = declarations[i];
-    debugger
     if (declaration.node.type === "VariableDeclaration") {
       const declarators = declaration.get("declarations");
       for (let j = 0; j < declarators.length; j++) {
@@ -564,17 +562,6 @@ function getActualMapDispToPropsDeclaration(program, mapDispatchToPropsName) {
 
 function getRootLevelVariablesAndFunctions(program) {
   const progBody = program.get("body");
-  return progBody.filter(({node:{type}}) =>(type === "VariableDeclaration" || type === "FunctionDeclaration"));
+  return progBody.filter(({ node: { type } }) => (type === "VariableDeclaration" || type === "FunctionDeclaration"));
 }
 
-function getFunctionsReturnStatement(funcBody) {
-  switch (funcBody.node.type) {
-    case "ObjectExpression": {
-      return funcBody;
-    }
-    case "BlockStatement": {
-      const blockStatements = funcBody.get("body");
-      return blockStatements.filter(({ node: { type } }) => type === "ReturnStatement")[0].get("argument");
-    }
-  }
-}

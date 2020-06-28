@@ -30,6 +30,66 @@
         subtraction3: subThree,
       })
 
-7.
+7. as arrow function with body as block statement
+  const mapDispatchToProps = dispatch => {
+    return {
+      multiplication2: function (...rest) {
+        dispatch(multiplication(...rest));
+      },
+      multiplication3: function (...rest) {
+        dispatch(multiplicationActions.multiplication3(...rest));
+      },
+      addition2: function (...rest) {
+        dispatch(addition(...rest));
+      },
+      addition3: function (...rest) {
+        dispatch(additionThree(...rest));
+      },
+      subtraction2: function (...rest) {
+        dispatch(subtraction(...rest));
+      },
+      subtraction3: function (...rest) {
+        dispatch(subThree(...rest));
+      }
+    }
+  };
+
+
+
+todo==>
+
+const mapDispatchToProps = dispatch => {
+  return {
+    multiplication2: multiplication,
+    ...multiplicationActions,
+    addition2: addition,
+    addition3: additionThree,
+    subtraction2: subtraction,
+    subtraction3: subThree
+  }
+};
+
+
+const mapDispatchToProps = (dispatch) => ({
+  multiplication2: function (...rest) {
+    dispatch(multiplication(...rest));
+  },
+  multiplication3: function (...rest) {
+    dispatch(multiplicationActions.multiplication3(...rest));
+  },
+  addition2: function (...rest) {
+    dispatch(addition(...rest));
+  },
+  addition3: function (...rest) {
+    dispatch(additionThree(...rest));
+  },
+  subtraction2: function (...rest) {
+    dispatch(subtraction(...rest));
+  },
+  subtraction3: function (...rest) {
+    dispatch(subThree(...rest));
+  },
+});
+
 
 //check comment
