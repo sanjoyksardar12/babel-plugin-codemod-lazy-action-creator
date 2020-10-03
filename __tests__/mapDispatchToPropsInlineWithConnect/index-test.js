@@ -4,7 +4,7 @@ const plugin = require("../../index.js");
 
 // import moduleName, {foo} from '../moduleName';
 
-// jest.mock("../../src/actions/multiplication.js", () => {
+// jest.mock("../../test-data/actions/multiplication.js", () => {
 //   return {
 //     __esModule: true,
 //     default: jest.fn(() => "Default multiplication of 2 nos."),
@@ -15,7 +15,7 @@ const plugin = require("../../index.js");
 // moduleName(); // Will return 42
 // foo();
 
-const babelConfig = { presets: [ "@babel/preset-react"], plugins: [plugin] };
+const babelConfig = { presets: ["@babel/preset-react"], plugins: [plugin] };
 
 // jest.mock("./actions/multiplication.js",()=>({
 //   default: ()=>"Default multiplication of 2 nos.",
@@ -23,24 +23,24 @@ const babelConfig = { presets: [ "@babel/preset-react"], plugins: [plugin] };
 // }));
 
 it("MapDispatchToProps as inline with connnect", () => {
-  const { code } = babel.transformFileSync(path.resolve(__dirname, "../../src/inlineWithConnect.js"), babelConfig);
+  const { code } = babel.transformFileSync(
+    path.resolve(__dirname, "../../test-data/inlineWithConnect.js"),
+    babelConfig
+  );
   expect(code).toMatchSnapshot();
 });
 
-it("MapDispatchToProps as object", () => {
-  const { code } = babel.transformFileSync(path.resolve(__dirname, "../../src/asObject.js"), babelConfig);
-  expect(code).toMatchSnapshot();
-});
+// it("MapDispatchToProps as object", () => {
+//   const { code } = babel.transformFileSync(path.resolve(__dirname, "../../test-data/asObject.js"), babelConfig);
+//   expect(code).toMatchSnapshot();
+// });
 
-it("MapDispatchToProps as fuction", () => {
-  const { code } = babel.transformFileSync(path.resolve(__dirname, "../../src/asFunction.js"), babelConfig);
-  expect(code).toMatchSnapshot();
-});
+// it("MapDispatchToProps as fuction", () => {
+//   const { code } = babel.transformFileSync(path.resolve(__dirname, "../../test-data/asFunction.js"), babelConfig);
+//   expect(code).toMatchSnapshot();
+// });
 
-it("MapDispatchToProps as arrowFuction", () => {
-  const { code } = babel.transformFileSync(path.resolve(__dirname, "../../src/asArrowFunction.js"), babelConfig);
-  expect(code).toMatchSnapshot();
-});
-
-
-
+// it("MapDispatchToProps as arrowFuction", () => {
+//   const { code } = babel.transformFileSync(path.resolve(__dirname, "../../test-data/asArrowFunction.js"), babelConfig);
+//   expect(code).toMatchSnapshot();
+// });

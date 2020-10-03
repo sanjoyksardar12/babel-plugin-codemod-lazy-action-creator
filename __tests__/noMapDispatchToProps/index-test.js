@@ -30,9 +30,10 @@ var noMapDispatToPropParam = `
 
 it("no MapDispatToProp Param", () => {
   const { code } = babel.transform(noMapDispatToPropParam, babelConfig);
+  console.log("\n\n--------------------no MapDispatToProp Param---------->>>");
+  console.info(code);
   expect(code).toMatchSnapshot();
 });
-
 
 var mapDispatchToPropsAsUndified = `
   import React, { Component } from "react";
@@ -61,9 +62,12 @@ var mapDispatchToPropsAsUndified = `
 
 it("MapDispatToProp as undefined", () => {
   const { code } = babel.transform(mapDispatchToPropsAsUndified, babelConfig);
-  expect(code).toMatchSnapshot()
+  console.log(
+    "\n\n---------------------------MapDispatToProp as undefined----------->>>>>"
+  );
+  console.log(code);
+  expect(code).toMatchSnapshot();
 });
-
 
 var mapDispatchToPropsAsNull = `
   import React, { Component } from "react";
@@ -92,12 +96,12 @@ var mapDispatchToPropsAsNull = `
 
 it("MapDispatToProp as null", () => {
   const { code } = babel.transform(mapDispatchToPropsAsNull, babelConfig);
-  expect(code).toMatchSnapshot()
-})
-
-
-
-
+  console.log(
+    "\n\n--------------------------------MapDispatToProp as null--------->>>>>"
+  );
+  console.log(code);
+  expect(code).toMatchSnapshot();
+});
 
 var mapDispatchToPropsAsEmptyObj = `
   import React, { Component } from "react";
@@ -126,8 +130,10 @@ var mapDispatchToPropsAsEmptyObj = `
 
 it("MapDispatToProp as empty obj", () => {
   const { code } = babel.transform(mapDispatchToPropsAsEmptyObj, babelConfig);
-  expect(code).toMatchSnapshot()
-})
-
-
-
+  console.log(
+    "\n\n-----------------------MapDispatToProp as empty obj------------------>>>>>"
+  );
+  console.log(code);
+  console.log("\n\n\n\n\n");
+  expect(code).toMatchSnapshot();
+});
