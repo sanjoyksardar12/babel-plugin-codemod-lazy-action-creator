@@ -8,6 +8,10 @@
   },
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sanjoyksardar12/babel-plugin-codemod-lazy-action-creator"
+  },
   "dependencies": {
     "@babel/parser": "^7.10.3",
     "@babel/traverse": "^7.10.3"
