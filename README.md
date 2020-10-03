@@ -24,11 +24,11 @@ const mapDispatchToProps= (dispatch) => {
 }
 ```
 
-then after bundle all the code related to these action will attached into bundle.
+then after bundle all the code related to these actions will attached into bundle.
 
-But the action definition may not required for the first load time, it may required for later on use interaction.
+But these actions definition may not required for the first load time, it may required for later on user interaction.
 
-so we can do lazy load these actions when required, then systax will be like
+so we can do lazy load these actions definitions when required, then systax will be like
 ```
 const mapDispatchToProps= (dispatch) => {
   return {
@@ -65,7 +65,7 @@ and add .babelrc
 
 
 # options
- You can disable this rule by adding  **/\*babel-lazy-action-creator: "disable"\*\/**
+ You can disable this rule by adding  **/\*babel-plugin-codemod-lazy-action-creator: "disable"\*\/**
   - for whole file add it in global scope
   - for a particular action add this comment before use of the action
 
