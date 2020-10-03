@@ -1,0 +1,95 @@
+1. no mapDispatchToProps
+
+      connect(mapStateToProps)(App);
+2. mapDispatchToProps as null
+
+      connect(mapStateToProps, null)(App);
+3. mapDispatchToProps as undefined
+      connect(mapStateToProps, undefined)(App);
+
+4. mapDispatchToProps as inline empty object
+      connect(mapStateToProps , {})
+
+5. as inline object
+      connect(mapStateToProps , {
+        multiplication2: multiplication,
+        multiplication3: multiplication3,
+        addition2: addition,
+        addition3: additionThree,
+        subtraction2: subtraction,
+        subtraction3: subThree,
+      })
+
+6. as inline with spread operator
+      connect(mapStateToProps , {
+        multiplication2: multiplication,
+        ...multiplicationActions,
+        addition2: addition,
+        addition3: additionThree,
+        subtraction2: subtraction,
+        subtraction3: subThree,
+      })
+
+7. as arrow function with body as block statement
+  const mapDispatchToProps = dispatch => {
+    return {
+      multiplication2: function (...rest) {
+        dispatch(multiplication(...rest));
+      },
+      multiplication3: function (...rest) {
+        dispatch(multiplicationActions.multiplication3(...rest));
+      },
+      addition2: function (...rest) {
+        dispatch(addition(...rest));
+      },
+      addition3: function (...rest) {
+        dispatch(additionThree(...rest));
+      },
+      subtraction2: function (...rest) {
+        dispatch(subtraction(...rest));
+      },
+      subtraction3: function (...rest) {
+        dispatch(subThree(...rest));
+      }
+    }
+  };
+
+
+
+todo==>
+
+const mapDispatchToProps = dispatch => {
+  return {
+    multiplication2: multiplication,
+    ...multiplicationActions,
+    addition2: addition,
+    addition3: additionThree,
+    subtraction2: subtraction,
+    subtraction3: subThree
+  }
+};
+
+
+const mapDispatchToProps = (dispatch) => ({
+  multiplication2: function (...rest) {
+    dispatch(multiplication(...rest));
+  },
+  multiplication3: function (...rest) {
+    dispatch(multiplicationActions.multiplication3(...rest));
+  },
+  addition2: function (...rest) {
+    dispatch(addition(...rest));
+  },
+  addition3: function (...rest) {
+    dispatch(additionThree(...rest));
+  },
+  subtraction2: function (...rest) {
+    dispatch(subtraction(...rest));
+  },
+  subtraction3: function (...rest) {
+    dispatch(subThree(...rest));
+  },
+});
+
+
+//check comment

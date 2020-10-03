@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MapDispatToProp as empty obj 1`] = `
+"import React, { Component } from \\"react\\";
+import { connect } from \\"react-redux\\";
+
+class App extends Component {
+  render() {
+    const {
+      addition,
+      subtraction,
+      multiplication
+    } = this.props;
+    return /*#__PURE__*/React.createElement(\\"div\\", {
+      className: \\"App\\"
+    }, /*#__PURE__*/React.createElement(\\"h1\\", null, \\"Map dispatchToProps as object\\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Multiplication: \\", multiplication, \\" \\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Addition: \\", addition, \\" \\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Subtraction: \\", subtraction, \\" \\"));
+  }
+
+}
+
+const mapStateToProps = state => {
+  return { ...state
+  };
+};
+
+export default connect(mapStateToProps, dispatch => ({}))(App);"
+`;
+
+exports[`MapDispatToProp as null 1`] = `
+"import React, { Component } from \\"react\\";
+import { connect } from \\"react-redux\\";
+
+class App extends Component {
+  render() {
+    const {
+      addition,
+      subtraction,
+      multiplication
+    } = this.props;
+    return /*#__PURE__*/React.createElement(\\"div\\", {
+      className: \\"App\\"
+    }, /*#__PURE__*/React.createElement(\\"h1\\", null, \\"Map dispatchToProps as object\\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Multiplication: \\", multiplication, \\" \\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Addition: \\", addition, \\" \\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Subtraction: \\", subtraction, \\" \\"));
+  }
+
+}
+
+const mapStateToProps = state => {
+  return { ...state
+  };
+};
+
+export default connect(mapStateToProps, null)(App);"
+`;
+
+exports[`MapDispatToProp as undefined 1`] = `
+"import React, { Component } from \\"react\\";
+import { connect } from \\"react-redux\\";
+
+class App extends Component {
+  render() {
+    const {
+      addition,
+      subtraction,
+      multiplication
+    } = this.props;
+    return /*#__PURE__*/React.createElement(\\"div\\", {
+      className: \\"App\\"
+    }, /*#__PURE__*/React.createElement(\\"h1\\", null, \\"Map dispatchToProps as object\\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Multiplication: \\", multiplication, \\" \\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Addition: \\", addition, \\" \\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Subtraction: \\", subtraction, \\" \\"));
+  }
+
+}
+
+const mapStateToProps = state => {
+  return { ...state
+  };
+};
+
+export default connect(mapStateToProps, undefined)(App);"
+`;
+
+exports[`no MapDispatToProp Param 1`] = `
+"import React, { Component } from \\"react\\";
+import { connect } from \\"react-redux\\";
+
+class App extends Component {
+  render() {
+    const {
+      addition,
+      subtraction,
+      multiplication
+    } = this.props;
+    return /*#__PURE__*/React.createElement(\\"div\\", {
+      className: \\"App\\"
+    }, /*#__PURE__*/React.createElement(\\"h1\\", null, \\"Map dispatchToProps as object\\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Multiplication: \\", multiplication, \\" \\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Addition: \\", addition, \\" \\"), /*#__PURE__*/React.createElement(\\"h2\\", null, \\" Subtraction: \\", subtraction, \\" \\"));
+  }
+
+}
+
+const mapStateToProps = state => {
+  return { ...state
+  };
+};
+
+export default connect(mapStateToProps)(App);"
+`;
