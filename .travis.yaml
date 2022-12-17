@@ -1,0 +1,21 @@
+sudo: false
+language: node_js
+codecov: 
+  token: 404b31fe-8709-43e7-a17c-1babd4605f24
+branches: 
+  expect:
+    - main
+notifications:
+  email: false
+node_js:
+  - 14
+before_install: 
+  - npm i - g npm@latest
+  - npm ci
+before_script: 
+  - npm prune
+# script:
+#   - npm run build
+after_script: 
+  # - npm run report-coverage
+  - npm run semantic-release
