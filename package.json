@@ -1,24 +1,44 @@
 {
   "name": "babel-plugin-codemod-lazy-action-creator",
-  "version": "1.0.6",
+  "version": "0.0.0-development",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "semantic-release": "semantic-release",
+    "commit": "cz"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "SanjoyK <sanjoyksardar12@gmail.com>",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/sanjoyksardar12/babel-plugin-codemod-lazy-action-creator"
   },
   "dependencies": {
     "@babel/parser": "^7.10.3",
-    "@babel/preset-env": "^7.11.0",
     "@babel/traverse": "^7.10.3"
   },
   "devDependencies": {
+    "@babel/cli": "7.19.3",
+    "@babel/core": "7.20.5",
+    "@babel/preset-env": "7.20.2",
     "@babel/preset-react": "^7.10.4",
-    "jest": "^26.1.0"
+    "@babel/register": "7.18.9",
+    "babel-loader": "9.1.0",
+    "codecov": "3.8.3",
+    "commitizen": "4.2.6",
+    "cz-conventional-changelog": "3.3.0",
+    "ghooks": "2.0.4",
+    "jest": "26.6.3",
+    "npm-run-all": "4.1.5",
+    "rimraf": "3.0.2",
+    "semantic-release": "^19.0.5",
+    "webpack": "5.75.0",
+    "webpack-cli": "5.0.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-conventional-changelog"
+    }
   }
 }
