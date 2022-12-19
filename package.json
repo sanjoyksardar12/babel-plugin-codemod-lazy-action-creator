@@ -2,7 +2,7 @@
   "name": "babel-plugin-codemod-lazy-action-creator",
   "version": "2.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "dis/idnex.js",
   "scripts": {
     "test": "jest src/index.test.js",
     "semantic-release": "semantic-release",
