@@ -4,9 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest src/index.test.js",
     "semantic-release": "semantic-release",
-    "commit": "cz"
+    "commit": "cz",
+    "build": "npm-run-all --parallel build:main",
+    "build:main": "babel --copy-files  --out-dir dist --ignore src/**/*.test.js src",
+    "build:umd": "webpack --output-filename index.umd.min.js",
+    "prettier:check": "prettier --check .",
+    "prettier:fix": "prettier --fix ."
   },
   "author": "SanjoyK <sanjoyksardar12@gmail.com>",
   "license": "MIT",
@@ -25,12 +30,26 @@
     "@babel/preset-react": "^7.10.4",
     "@babel/register": "7.18.9",
     "babel-loader": "9.1.0",
+    "chai": "4.3.7",
     "codecov": "3.8.3",
     "commitizen": "4.2.6",
     "cz-conventional-changelog": "3.3.0",
+    "eslint": "8.30.0",
+    "eslint-config-airbnb": "19.0.4",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-jsx-a11y": "6.6.1",
+    "eslint-plugin-react": "7.31.11",
+    "eslint-plugin-react-hooks": "4.6.0",
     "ghooks": "2.0.4",
+    "husky": "8.0.2",
     "jest": "26.6.3",
+    "lint-staged": "13.1.0",
     "npm-run-all": "4.1.5",
+    "prettier": "2.8.1",
+    "react": "18.2.0",
+    "react-redux": "8.0.5",
     "rimraf": "3.0.2",
     "semantic-release": "^19.0.5",
     "webpack": "5.75.0",
@@ -39,6 +58,12 @@
   "config": {
     "commitizen": {
       "path": "node_modules/cz-conventional-changelog"
+    },
+    "ghooks": {
+      "pre-commit": "npm run prettier:fix"
     }
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }

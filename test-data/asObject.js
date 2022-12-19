@@ -1,3 +1,15 @@
+/* eslint-disable arrow-body-style */
+/* eslint-disable comma-dangle */
+/* eslint-disable arrow-parens */
+/* eslint-disable semi */
+/* eslint-disable no-shadow */
+/* eslint-disable react/jsx-one-expression-per-line */
+/* eslint-disable react/jsx-filename-extension */
+/* eslint-disable padded-blocks */
+/* eslint-disable react/prop-types */
+/* eslint-disable import/extensions */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable quotes */
 
 import React, { Component } from "react";
 import { connect } from "react-redux";
@@ -30,7 +42,7 @@ class App extends Component {
     }, 1000 * 4);
 
     setTimeout(() => {
-      const { subtraction2 , subtraction3 } = this.props;
+      const { subtraction2, subtraction3 } = this.props;
       subtraction2(2, 3);
 
       setTimeout(() => {
@@ -53,13 +65,13 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = state=>{
-  return{
+const mapStateToProps = state => {
+  return {
     ...state
   }
 }
 
-const mapdispatchToProps= {
+const mapdispatchToProps = {
   multiplication2: multiplication,
   ...multiplicationActions,
   addition2: addition,
@@ -67,6 +79,5 @@ const mapdispatchToProps= {
   subtraction2: subtraction,
   subtraction3: subThree
 };
-
 
 export default connect(mapStateToProps, mapdispatchToProps)(App);
