@@ -6,7 +6,7 @@ const config = {
   entry: './src/index',
   output: {
     path: join(__dirname, 'dist'),
-    libraryTarget: 'commonjs',
+    libraryTarget: 'commonjs2',
     library: 'babel-plugin-codemod-lazy-action-creator',
   },
   devtool: 'source-map',
