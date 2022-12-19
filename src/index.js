@@ -18,7 +18,7 @@ exports.default = function ({ types: t }) {
         if (!isRequiredlazyLoad(path)) {
           return
         }
-        debugger
+        
         const mapDispatchToPropsNode = getMapDispatchToPropsNode(path)
         if (isValidMapDispatchToProps(mapDispatchToPropsNode)) {
           return
@@ -219,7 +219,7 @@ function modifyReturnStatetmentWithDynamicImport(
       prop,
       isMapDispatchToPropsObject
     )
-    debugger
+    
     const modifiedFunction = constructLazyActionCreator(
       t,
       returnStatement,
@@ -558,7 +558,6 @@ function isValidMapDispatchToProps(mapDispatchToPropsNode) {
 //path=> connect statement
 //mapDispatchToPropsNode => connect expression's 2nd parameter as node
 function getReturnStatement(path, mapDispatchToPropsNode) {
-  debugger
   switch (mapDispatchToPropsNode.node.type) {
     case 'ObjectExpression': {
       return {

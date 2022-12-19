@@ -10,13 +10,11 @@ const path = require('path');
 
 describe('map Dispatch to props', () => {
   fit('MapDispatchToProps as fuction', () => {
-    debugger;
 
     console.log(path.resolve(__dirname, '../test-data/asObject.js'))
     const { code } = babel.transformFileSync(
       path.resolve(__dirname, '../test-data/asFunction.js'),
       require('../.babelrc.js'),
     );
-    expect(code).toMatchSnapshot();
   });
 });
